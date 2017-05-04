@@ -4,7 +4,7 @@ from models.Model import Model, Attribute
 class Example(Model):
     args = {
         'id': Attribute(methods=['get'], type=int),
-        'name': Attribute(methods=['get', 'post'],
+        'name': Attribute(methods=['get', 'post', 'put'],
                           mandatory=['post'], type=str),
     }
 
@@ -22,7 +22,6 @@ class Example(Model):
         return params
 
     @Model.method('PUT')
+    @Model.url('/example/{id}')
     def put(self, **params):
-        url = '/example/' + str(params['id'])
-        del params['id']
-        return url, params
+        return params

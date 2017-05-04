@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 
 
 class APIError(Exception):
@@ -59,65 +60,35 @@ class Model:
         allowed, mandatory = self.get_args('get')
         fields = self._build_request('get', allowed, mandatory, **params)
         url = self.config.endpoint + url
-        if self.config.use_auth and self.config.use_token:
-            fields[self.config.auth_token_field] = self.config.auth_token
-            request = requests.get(url, fields)
-        elif self.config.use_auth:
-            request = requests.get(url, fields, auth=self.config.auth)
-        else:
-            request = requests.get(url, fields)
+        request = requests.get(url, fields, auth=self.config.auth)
         return self._build_response(request)
 
     def _post(self, url, **params):
         allowed, mandatory = self.get_args('post')
         fields = self._build_request('post', allowed, mandatory, **params)
         url = self.config.endpoint + url
-        if self.config.use_auth and self.config.use_token:
-            fields[self.config.auth_token_field] = self.config.auth_token
-            request = requests.post(url, fields)
-        elif self.config.use_auth:
-            request = requests.post(url, fields, auth=self.config.auth)
-        else:
-            request = requests.post(url, fields)
+        request = requests.post(url, fields, auth=self.config.auth)
         return self._build_response(request)
 
     def _put(self, url, **params):
         allowed, mandatory = self.get_args('put')
         fields = self._build_request('put', allowed, mandatory, **params)
         url = self.config.endpoint + url
-        if self.config.use_auth and self.config.use_token:
-            fields[self.config.auth_token_field] = self.config.auth_token
-            request = requests.put(url, fields)
-        elif self.config.use_auth:
-            request = requests.put(url, fields, auth=self.config.auth)
-        else:
-            request = requests.put(url, fields)
+        request = requests.put(url, fields, auth=self.config.auth)
         return self._build_response(request)
 
     def _patch(self, url, **params):
         allowed, mandatory = self.get_args('patch')
         fields = self._build_request('patch', allowed, mandatory, **params)
         url = self.config.endpoint + url
-        if self.config.use_auth and self.config.use_token:
-            fields[self.config.auth_token_field] = self.config.auth_token
-            request = requests.patch(url, fields)
-        elif self.config.use_auth:
-            request = requests.patch(url, fields, auth=self.config.auth)
-        else:
-            request = requests.patch(url, fields)
+        request = requests.patch(url, fields, auth=self.config.auth)
         return self._build_response(request)
 
     def _delete(self, url, **params):
         allowed, mandatory = self.get_args('delete')
         fields = self._build_request('delete', allowed, mandatory, **params)
         url = self.config.endpoint + url
-        if self.config.use_auth and self.config.use_token:
-            fields[self.config.auth_token_field] = self.config.auth_token
-            request = requests.delete(url, data=fields)
-        elif self.config.use_auth:
-            request = requests.delete(url, data=fields, auth=self.config.auth)
-        else:
-            request = requests.put(url, data=fields)
+        request = requests.delete(url, data=fields, auth=self.config.auth)
         return self._build_response(request)
 
     def _build_response(self, response):
@@ -145,31 +116,50 @@ class Model:
         """
         fields = {}
         for key, val in params.items():
-            # If dict, we take the type coresponding to the method
-            if(key not in self.args.keys() or
-               method not in self.args[key].methods):
-                raise ParameterError('The parameter ' +
-                                     key + ' is not allowed.')
-            if isinstance(self.args[key].type, dict):
-                type = self.args[key].type[method]
-            else:
-                type = self.args[key].type
-            if not isinstance(val, type):
-                raise ParameterError('The parameter ' +
-                                     key + ' should be of type ' +
-                                     type.__name__ + '.')
-            if key in allowed:
-                fields[key] = val
+            if not re.match('_{1,2}.*', key):
+                # If dict, we take the type coresponding to the method
+                if(key not in self.args.keys() or
+                   method not in self.args[key].methods):
+                    raise ParameterError('The parameter ' +
+                                         key + ' is not allowed.')
+                if isinstance(self.args[key].type, dict):
+                    type = self.args[key].type[method]
+                else:
+                    type = self.args[key].type
+                if not isinstance(val, type):
+                    raise ParameterError('The parameter ' +
+                                         key + ' should be of type ' +
+                                         type.__name__ + '.')
+                if key in allowed:
+                    fields[key] = val
+        defaults = self.config.args
+        defaults.update(fields)
+        fields = defaults
         for m in mandatory:
             if m not in fields.keys():
                 raise ParameterError('The parameter ' + m + ' is required.')
         return fields
 
     @staticmethod
-    def url(url):
-        def decorate(func):
-            def wrapper(self, **params):
-                return url, params
+    def url(addr):
+        def decorate(func, addr=addr):
+            def wrapper(self, addr=addr, **params):
+                params = func(self, **params)
+                regex = r'(?:[^{}])*{([a-zA-Z-9\_]*)}(?:[^{}])*'
+                url_prog = re.compile(regex, re.DOTALL)
+                if url_prog.match(addr):
+                    res = url_prog.findall(addr)
+                    for param in res:
+                        if '_' + param in params.keys():
+                            addr = addr.replace('{' + param + '}',
+                                                str(params['_' + param]))
+                        else:
+                            raise ParameterError('The parameter _' +
+                                                 param + ' is missing.')
+                params['__url'] = addr
+                if '__method' in params:
+                    return self._call_api(params)
+                return params
             return wrapper
         return decorate
 
@@ -178,23 +168,29 @@ class Model:
         def decorate(func):
             def wrapper(self, **params):
                 params = func(self, **params)
-                if '_url' in params.keys():
-                    url = params['_url']
-                else:
-                    raise 
-                if method.lower() == 'get':
-                    response = self._get(url, **params)
-                elif method.lower() == 'post':
-                    response = self._post(url, **params)
-                elif method.lower() == 'put':
-                    response = self._put(url, **params)
-                elif method.lower() == 'patch':
-                    response = self._patch(url, **params)
-                elif method.lower() == 'delete':
-                    response = self._delete(url, **params)
-                return response
+                params['__method'] = method.lower()
+                # If the url is already added, we can call the API
+                if '__url' in params.keys():
+                    return self._call_api(params)
+                # Else we just return the parms
+                return params
             return wrapper
         return decorate
+
+    def _call_api(self, params):
+        url = params['__url']
+        method = params['__method']
+        if method == 'get':
+            response = self._get(url, **params)
+        elif method == 'post':
+            response = self._post(url, **params)
+        elif method == 'put':
+            response = self._put(url, **params)
+        elif method == 'patch':
+            response = self._patch(url, **params)
+        elif method == 'delete':
+            response = self._delete(url, **params)
+        return response
 
 
 class Attribute:
