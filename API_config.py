@@ -7,7 +7,6 @@ class API_CONFIG:
         self.args = {}
         self.use_auth = False
         self.auth = None
-        self.use_token = False
 
     def set_auth(self, authObj):
         self.use_auth = True

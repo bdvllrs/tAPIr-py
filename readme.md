@@ -21,8 +21,8 @@ Then instanciate your model. The constructor takes the API configuration.
 ### Authentification
 
 You can use several type of identification:
-- basic auth `CONFIG.basic_auth('username', 'password')`
-- digest auth `CONFIG.digest_auth('username', 'password')`
+- Basic auth `CONFIG.basic_auth('username', 'password')`
+- Digest auth `CONFIG.digest_auth('username', 'password')`
 - Own requests auth class `CONFIG.class_auth(authObj, *params)`
 
 ### Add global arguments
