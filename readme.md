@@ -62,8 +62,15 @@ class Example(Model):
 
 If the type of your attributes is different between several methods, `type` can also be a dict object : 
 
-```
-type={'get': str, 'post', int}
+``` python
+
+class Example(Model):
+    args = {
+        'id': Attribute(methods=['get', 'post'], mandarory=['post'], type={
+    'get': int
+}) 
+    }
+
 ```
 
 ### Methods
