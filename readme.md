@@ -67,7 +67,8 @@ If the type of your attributes is different between several methods, `type` can 
 class Example(Model):
     args = {
         'id': Attribute(methods=['get', 'post'], mandarory=['post'], type={
-            'get': int
+            'get': str,
+            'post': int
         }) 
     }
 
