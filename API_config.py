@@ -1,4 +1,4 @@
-from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
 
 class API_CONFIG:
@@ -16,14 +16,20 @@ class API_CONFIG:
     def basic_auth(self, username, password):
         self.set_auth(HTTPBasicAuth(username, password))
 
-    def token_auth(self, token, field='token'):
-        self.use_auth = True
-        self.use_token = True
-        self.auth_token = token
-        self.auth_token_field = field
+    def digest_auth(self, username, password):
+        self.set_auth(HTTPDigestAuth(username, password))
+
+    def class_auth(self, auth_obj, *params):
+        self.set_auth(auth_obj(*params))
 
     def set_global_arg(self, key, value):
+        """
+        Add or edit a global argument
+        """
         self.args[key] = value
 
     def get_global_arg(self, key):
+        """
+        Get the value of a global argument
+        """
         return self.args[key]
