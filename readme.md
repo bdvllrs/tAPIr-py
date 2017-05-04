@@ -33,7 +33,9 @@ To get a global argument, use the `API_CONFIG.get_global_arg(self, key)` method.
 
 ## Creating a model
 
-The model is a class which extends from the Model class.
+Start by importing `Model` and `Attribute` from the `models/Model.py` file.
+
+A model is a class which extends the Model class.
 
 ### Defining the arguments
 
