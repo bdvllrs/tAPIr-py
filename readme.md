@@ -1,6 +1,6 @@
 # tAPIr
 
-tAPIr is a wrapper for the requests python package the makes API requests easier.
+tAPIr is a wrapper for the requests python package to makes API requests easier.
 
 ## Basic idea
 
