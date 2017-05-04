@@ -25,3 +25,4 @@ class Example(Model):
     @Model.url('/example/{id}')
     def put(self, **params):
         return params
+

@@ -115,8 +115,8 @@ If you then call `Example.get(_id=5)` it will call the url ``/examples/5`.
 You can now instanciate your model to use it (don't forget to pass the CONFIG parameter):
 
 ``` python
-    example = Example(CONFIG)
-    results = example.get(id=5)
+example = Example(CONFIG)
+results = example.get(id=5)
 ```
 
 will call `http://localhost/api/examples?id=5`.
