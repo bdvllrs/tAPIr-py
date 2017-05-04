@@ -101,13 +101,13 @@ The `Model.url` decorator can contain some `{param}` in its content.
 You will then have to pass a `_param` to your get method:
 
 ``` python
-    @Model.method('GET')
-    @Model.url('/examples/{id}')
-    def get(self, **params):
+    @Model.method('PUT')
+    @Model.url('/example/{id}')
+    def put(self, **params):
         return params
 ```
 
-If you then call `Example.get(_id=5)` it will call the url ``/examples/5`.
+If you then call `Example.put(_id=5)` it will call the url ``/example/5`.
 
 ### Calling the API
 
