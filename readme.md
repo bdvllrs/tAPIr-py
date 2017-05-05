@@ -109,7 +109,7 @@ You will then have to pass a `_param` to your get method:
         return params
 ```
 
-If you then call `Example.put(_id=5)` it will call the url ``/example/5`.
+If you then call `Example.put(_id=5)` it will call the url `/example/5`.
 
 ### Calling the API
 
