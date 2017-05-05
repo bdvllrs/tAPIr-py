@@ -113,7 +113,7 @@ If you then call `Example.put(_id=5)` it will call the url `/example/5`.
 
 ### Url and method attributes
 
-The decorators add `__url` or `__method` items in the params dict (and execute the requests when all the parameters are set). You can then manually set the url or the method without using the associated decorator. If you don't want to use any decorator, you will have to return the result of the `Model._get(self, url, params)` method (or `_put`, '`_post`, `_patch`, `_delete` methods) to make the request. 
+The decorators add `__url` or `__method` items in the params dict (and execute the requests when all the parameters are set). You can then manually set the url or the method without using the associated decorator. If you don't want to use any decorator, you will have to return the result of the `Model._get(self, url, params)` method (or `_put`, `_post`, `_patch`, `_delete` methods) to make the request. 
 
 ### Calling the API
 
