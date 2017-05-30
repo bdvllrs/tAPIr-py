@@ -100,7 +100,7 @@ To specify that this method will call the API with a `GET` method, we will add t
 
 There is some case when the url depends on some arguments. 
 The `Model.url` decorator can contain some `{param}` in its content. 
-You will then have to pass a `_param` to your get method:
+You will then have to pass a `_param` to your put method:
 
 ``` python
     @Model.method('PUT')
@@ -109,7 +109,11 @@ You will then have to pass a `_param` to your get method:
         return params
 ```
 
-If you then call `Example.put(_id=5)` it will call the url ``/example/5`.
+If you then call `Example.put(_id=5)` it will call the url `/example/5`.
+
+### Url and method attributes
+
+The decorators add `__url` or `__method` items in the params dict (and execute the requests when all the parameters are set). You can then manually set the url or the method without using the associated decorator. If you don't want to use any decorator, you will have to return the result of the `Model._get(self, url, params)` method (or `_put`, `_post`, `_patch`, `_delete` methods) to make the request. 
 
 ### Calling the API
 
