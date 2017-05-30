@@ -58,37 +58,53 @@ class Model:
         :param params: fields for the request
         """
         allowed, mandatory = self.get_args('get')
-        fields = self._build_request('get', allowed, mandatory, **params)
+        fields, headers, _ = self._build_request('get',
+                                                 allowed,
+                                                 mandatory,
+                                                 **params)
         url = self.config.endpoint + url
-        request = requests.get(url, fields, auth=self.config.auth)
+        request = requests.get(url, fields,
+                               auth=self.config.auth,
+                               headers=headers)
         return self._build_response(request)
 
     def _post(self, url, **params):
         allowed, mandatory = self.get_args('post')
-        fields = self._build_request('post', allowed, mandatory, **params)
+        fields, headers, content = self._build_request('post',
+                                                       allowed,
+                                                       mandatory,
+                                                       **params)
         url = self.config.endpoint + url
-        request = requests.post(url, fields, auth=self.config.auth)
+        request = requests.post(url, fields, auth=self.config.auth,
+                                headers=headers,
+                                json=content)
         return self._build_response(request)
 
     def _put(self, url, **params):
         allowed, mandatory = self.get_args('put')
-        fields = self._build_request('put', allowed, mandatory, **params)
+        fields, headers, content = self._build_request('put', allowed,
+                                                       mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.put(url, fields, auth=self.config.auth)
+        request = requests.put(url, fields, auth=self.config.auth,
+                               headers=headers, json=content)
         return self._build_response(request)
 
     def _patch(self, url, **params):
         allowed, mandatory = self.get_args('patch')
-        fields = self._build_request('patch', allowed, mandatory, **params)
+        fields, headers, content = self._build_request('patch', allowed,
+                                                       mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.patch(url, fields, auth=self.config.auth)
+        request = requests.patch(url, fields, auth=self.config.auth,
+                                 headers=headers, json=content)
         return self._build_response(request)
 
     def _delete(self, url, **params):
         allowed, mandatory = self.get_args('delete')
-        fields = self._build_request('delete', allowed, mandatory, **params)
+        fields, headers, content = self._build_request('delete', allowed,
+                                                       mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.delete(url, data=fields, auth=self.config.auth)
+        request = requests.delete(url, data=fields, auth=self.config.auth,
+                                  headers=headers, json=content)
         return self._build_response(request)
 
     def _build_response(self, response):
@@ -115,6 +131,8 @@ class Model:
         :param method: met
         """
         fields = {}
+        headers = {}
+        content = {}
         for key, val in params.items():
             if not re.match('_{1,2}.*', key):
                 # If dict, we take the type coresponding to the method
@@ -122,7 +140,11 @@ class Model:
                    method not in self.args[key].methods):
                     raise ParameterError('The parameter ' +
                                          key + ' is not allowed.')
-                if isinstance(self.args[key].type, dict):
+                if key == '__headers':
+                    headers = val
+                elif key == '__content':
+                    content = val
+                elif isinstance(self.args[key].type, dict):
                     type = self.args[key].type[method]
                 else:
                     type = self.args[key].type
@@ -138,7 +160,7 @@ class Model:
         for m in mandatory:
             if m not in fields.keys():
                 raise ParameterError('The parameter ' + m + ' is required.')
-        return fields
+        return fields, headers, content
 
     @staticmethod
     def url(addr):
