@@ -1,6 +1,7 @@
 import requests
 import json
 import re
+import copy
 
 
 class APIError(Exception):
@@ -75,9 +76,8 @@ class Model:
                                                        mandatory,
                                                        **params)
         url = self.config.endpoint + url
-        request = requests.post(url, fields, auth=self.config.auth,
-                                headers=headers,
-                                json=content)
+        request = requests.post(url, json=fields, auth=self.config.auth,
+                                headers=headers)
         return self._build_response(request)
 
     def _put(self, url, **params):
@@ -85,8 +85,8 @@ class Model:
         fields, headers, content = self._build_request('put', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.put(url, fields, auth=self.config.auth,
-                               headers=headers, json=content)
+        request = requests.put(url, json=fields, auth=self.config.auth,
+                               headers=headers)
         return self._build_response(request)
 
     def _patch(self, url, **params):
@@ -94,8 +94,8 @@ class Model:
         fields, headers, content = self._build_request('patch', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.patch(url, fields, auth=self.config.auth,
-                                 headers=headers, json=content)
+        request = requests.patch(url, json=fields, auth=self.config.auth,
+                                 headers=headers)
         return self._build_response(request)
 
     def _delete(self, url, **params):
@@ -103,8 +103,8 @@ class Model:
         fields, headers, content = self._build_request('delete', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.delete(url, data=fields, auth=self.config.auth,
-                                  headers=headers, json=content)
+        request = requests.delete(url, json=fields, auth=self.config.auth,
+                                  headers=headers)
         return self._build_response(request)
 
     def _build_response(self, response):
@@ -112,7 +112,7 @@ class Model:
         code = response.status_code
         if code == 404:
             raise NotFound('La requête demandé n\'est pas disponible.')
-
+        # print(code, response.content)
         data = json.loads(response.content)
 
         if code == 403:  # FORBIDDEN
@@ -140,10 +140,6 @@ class Model:
                    method not in self.args[key].methods):
                     raise ParameterError('The parameter ' +
                                          key + ' is not allowed.')
-                if key == '__headers':
-                    headers = val
-                elif key == '__content':
-                    content = val
                 elif isinstance(self.args[key].type, dict):
                     type = self.args[key].type[method]
                 else:
@@ -154,7 +150,9 @@ class Model:
                                          type.__name__ + '.')
                 if key in allowed:
                     fields[key] = val
-        defaults = self.config.args
+            elif key == '__headers':
+                headers = val
+        defaults = copy.copy(self.config.args)
         defaults.update(fields)
         fields = defaults
         for m in mandatory:
