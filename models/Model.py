@@ -137,8 +137,10 @@ class Model:
         if code == 404:
             raise NotFound('La requête demandé n\'est pas disponible.')
         # print(code, response.content)
-        data = json.loads(response.content)
-
+        try:
+            data = json.loads(response.content)
+        except Exception as e:
+            raise BadRequest(response.content)
         if code == 403:  # FORBIDDEN
             raise InvalidToken(data)
         elif code == 400:
