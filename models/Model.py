@@ -175,7 +175,7 @@ class Model:
                 if key in allowed:
                     fields[key] = val
             elif key == '__content':
-                content[key] = val
+                content = val
             elif key == '__headers':
                 headers = val
         defaults = copy.copy(self.config.args)
