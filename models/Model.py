@@ -1,5 +1,5 @@
 import requests
-import json
+# import json
 import re
 import copy
 
@@ -138,7 +138,7 @@ class Model:
             raise NotFound('La requête demandé n\'est pas disponible.')
         # print(code, response.content)
         try:
-            data = json.loads(response.content)
+            data = response.json()
         except Exception as e:
             raise BadRequest(response.content)
         if code == 403:  # FORBIDDEN
