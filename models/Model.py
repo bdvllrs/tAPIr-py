@@ -76,7 +76,13 @@ class Model:
                                                        mandatory,
                                                        **params)
         url = self.config.endpoint + url
-        request = requests.post(url, json=fields, auth=self.config.auth,
+        if content != {}:
+            params = fields
+            data = content
+        else:
+            data = fields
+            params = {}
+        request = requests.post(url, params=params, json=data, auth=self.config.auth,
                                 headers=headers)
         return self._build_response(request)
 
@@ -85,7 +91,13 @@ class Model:
         fields, headers, content = self._build_request('put', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.put(url, json=fields, auth=self.config.auth,
+        if content != {}:
+            params = fields
+            data = content
+        else:
+            data = fields
+            params = {}
+        request = requests.put(url, params=params, json=data, auth=self.config.auth,
                                headers=headers)
         return self._build_response(request)
 
@@ -94,7 +106,13 @@ class Model:
         fields, headers, content = self._build_request('patch', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.patch(url, json=fields, auth=self.config.auth,
+        if content != {}:
+            params = fields
+            data = content
+        else:
+            data = fields
+            params = {}
+        request = requests.patch(url, params=params, json=data, auth=self.config.auth,
                                  headers=headers)
         return self._build_response(request)
 
@@ -103,7 +121,13 @@ class Model:
         fields, headers, content = self._build_request('delete', allowed,
                                                        mandatory, **params)
         url = self.config.endpoint + url
-        request = requests.delete(url, json=fields, auth=self.config.auth,
+        if content != {}:
+            params = fields
+            data = content
+        else:
+            data = fields
+            params = {}
+        request = requests.delete(url, params=params, json=data, auth=self.config.auth,
                                   headers=headers)
         return self._build_response(request)
 
@@ -150,6 +174,8 @@ class Model:
                                          type.__name__ + '.')
                 if key in allowed:
                     fields[key] = val
+            elif key == '__content':
+                content[key] = val
             elif key == '__headers':
                 headers = val
         defaults = copy.copy(self.config.args)
